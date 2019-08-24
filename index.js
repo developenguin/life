@@ -3,6 +3,7 @@ const canvas = document.getElementById('canvas'),
       nextGen = document.getElementById('next-gen'),
       run = document.getElementById('run'),
       stop = document.getElementById('stop'),
+      seed = document.getElementById('seed'),
       canvasSize = 800,
       cellSize = 5,
       amountOfCells = canvasSize / cellSize;
@@ -25,8 +26,13 @@ function setup() {
   ctx.strokeRect(0, 0, canvasSize, canvasSize);
   drawGrid();
   currentState = initializeState();
+  registerEventListeners();
 
-  canvas.addEventListener('click', e => {
+}
+
+function registerEventListeners() {
+
+  canvas.onclick = e => {
 
     const cellX = Math.floor(e.layerX / cellSize);
     const cellY = Math.floor(e.layerY / cellSize);
@@ -34,22 +40,34 @@ function setup() {
     currentState[cellX][cellY] = !currentState[cellX][cellY];
     drawCellsFromState();
 
-  });
+  };
 
-  nextGen.addEventListener('click', () => {
+  nextGen.onclick = () => {
     currentState = calculateNextState();
     drawCellsFromState();
-  });
+  };
 
-  run.addEventListener('click', onClickRun);
-  stop.addEventListener('click', () => {
+  run.onclick = () => {
+    animation = window.requestAnimationFrame(doStep);
+  };
+
+  stop.onclick = () => {
     window.cancelAnimationFrame(animation);
-  });
+  };
 
-}
+  reset.onclick = () => {
+    window.cancelAnimationFrame(animation);
+    currentState = initializeState();
+    drawCellsFromState();
+  };
 
-function onClickRun() {
-  animation = window.requestAnimationFrame(doStep);
+  seed.onclick = () => {
+    window.cancelAnimationFrame(animation);
+    currentState = initializeState();
+    drawAcorn();
+    drawCellsFromState();
+  }
+
 }
 
 function doStep() {
@@ -88,6 +106,25 @@ function drawCellsFromState() {
       ctx.fillRect(rowIdx * cellSize + 1, colIdx * cellSize + 1, cellSize - 2, cellSize - 2)
 
     });
+  });
+
+}
+
+function drawAcorn() {
+
+  const hStart = amountOfCells / 2 + 10;
+  const vStart = amountOfCells / 2;
+
+  [
+    [hStart, vStart],
+    [hStart + 1, vStart],
+    [hStart + 1, vStart - 2],
+    [hStart + 3, vStart - 1],
+    [hStart + 4, vStart],
+    [hStart + 5, vStart],
+    [hStart + 6, vStart]
+  ].forEach(pos => {
+    currentState[pos[0]][pos[1]] = true;
   });
 
 }
