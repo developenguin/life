@@ -17,6 +17,7 @@ ctx.imageSmoothingQuality = 'high';
 ctx.lineWidth = 1;
 
 let currentState;
+let nextState;
 let animation;
 
 function setup() {
@@ -26,6 +27,7 @@ function setup() {
   ctx.strokeRect(0, 0, canvasSize, canvasSize);
   drawGrid();
   currentState = initializeState();
+  nextState = initializeState();
   registerEventListeners();
 
 }
@@ -37,13 +39,13 @@ function registerEventListeners() {
     const cellX = Math.floor(e.layerX / cellSize);
     const cellY = Math.floor(e.layerY / cellSize);
 
-    currentState[cellX][cellY] = !currentState[cellX][cellY];
+    nextState[cellX][cellY] = !currentState[cellX][cellY];
     drawCellsFromState();
 
   };
 
   nextGen.onclick = () => {
-    currentState = calculateNextState();
+    nextState = calculateNextState();
     drawCellsFromState();
   };
 
@@ -58,6 +60,7 @@ function registerEventListeners() {
   reset.onclick = () => {
     window.cancelAnimationFrame(animation);
     currentState = initializeState();
+    nextState = null;
     drawCellsFromState();
   };
 
@@ -71,7 +74,7 @@ function registerEventListeners() {
 }
 
 function doStep() {
-  currentState = calculateNextState();
+  nextState = calculateNextState();
   drawCellsFromState();
   animation = window.requestAnimationFrame(doStep);
 }
@@ -94,19 +97,27 @@ function drawGrid() {
 
 function drawCellsFromState() {
 
-  currentState.forEach((row, rowIdx) => {
-    row.forEach((val, colIdx) => {
+  for (let i = 0; i < amountOfCells; i++) {
+    for (let j = 0; j < amountOfCells; j++) {
 
-      if (val) {
-        ctx.fillStyle = '#000000';
-      } else {
-        ctx.fillStyle = '#ffffff';
+      const currentVal = currentState[i][j];
+      const nextVal = nextState[i][j];
+
+      if (!(currentVal === nextVal)) {
+
+        if (nextVal) {
+          ctx.fillStyle = '#000000';
+        } else {
+          ctx.fillStyle = '#ffffff';
+        }
+
+        ctx.fillRect(i * cellSize + 1, j * cellSize + 1, cellSize - 2, cellSize - 2);
+
       }
+    }
+  }
 
-      ctx.fillRect(rowIdx * cellSize + 1, colIdx * cellSize + 1, cellSize - 2, cellSize - 2)
-
-    });
-  });
+  currentState = nextState;
 
 }
 
@@ -124,7 +135,7 @@ function drawAcorn() {
     [hStart + 5, vStart],
     [hStart + 6, vStart]
   ].forEach(pos => {
-    currentState[pos[0]][pos[1]] = true;
+    nextState[pos[0]][pos[1]] = true;
   });
 
 }
