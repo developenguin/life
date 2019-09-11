@@ -147,7 +147,7 @@ function calculateNextState() {
 
   currentState.forEach((row, rowIdx) => {
     row.forEach((val, colIdx) => {
-      nextState[rowIdx][colIdx] = isCellAlive(rowIdx, colIdx, val);
+      nextState[rowIdx][colIdx] = shouldCellLive(rowIdx, colIdx, val);
     });
   });
 
@@ -155,11 +155,11 @@ function calculateNextState() {
 
 }
 
-function isCellAlive(row, col, val) {
+function shouldCellLive(row, col, isCurrentlyAlive) {
 
   const aliveCells = getAliveNeighborsForCell(row, col);
 
-  return val
+  return isCurrentlyAlive
     ? aliveCells === 2 || aliveCells === 3
     : aliveCells === 3;
 
@@ -168,22 +168,26 @@ function isCellAlive(row, col, val) {
 function getAliveNeighborsForCell(row, col) {
 
   var count = 0;
+  const possibleNeighbors = [
+    [row - 1, col - 1],
+    [row - 1, col],
+    [row - 1, col + 1],
+    [row, col - 1],
+    [row, col + 1],
+    [row + 1, col - 1],
+    [row + 1, col],
+    [row + 1, col + 1]
+  ];
 
-  for (i = -1; i <= 1; i++) {
-    for (j = -1; j <= 1; j++) {
+  return possibleNeighbors.reduce((acc, next) => {
 
-      if (!(i === 0 && j === 0) && isInsideGrid(row+i, col+j)) {
+    acc = isInsideGrid(next[0], next[1]) && currentState[next[0]][next[1]]
+      ? acc += 1
+      : acc;
 
-        const isAlive = currentState[row+i][col+j];
+    return acc;
 
-        if (isAlive) {
-          count++;
-        }
-      }
-    }
-  }
-
-  return count;
+  }, 0);
 
 }
 
